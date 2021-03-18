@@ -113,7 +113,6 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
-
                 // Sign-in succeeded, set up the UI
                 Toast.makeText(this, "Signed in!", Toast.LENGTH_SHORT).show()
             } else if (resultCode == RESULT_CANCELED) {
@@ -126,13 +125,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        mFirebaseAuth?.addAuthStateListener(mAuthStateListener)
+        mAuthStateListener?.let {
+            mFirebaseAuth?.addAuthStateListener(it)
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        if (mAuthStateListener != null) {
-            mFirebaseAuth?.removeAuthStateListener(mAuthStateListener);
+        mAuthStateListener?.let {
+            mFirebaseAuth?.removeAuthStateListener(it)
         }
         mMessageAdapter?.clear()
         detachDatabaseReadListener()
@@ -184,8 +185,11 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "onChildRemoved: " + friendlyMessage?.text)
                 }
 
-                override fun onChildMoved(dataSnapshot: DataSnapshot, previousChildName: String?) {}
-                override fun onCancelled(databaseError: DatabaseError) {}
+                override fun onChildMoved(dataSnapshot: DataSnapshot, previousChildName: String?) =
+                        Unit
+
+                override fun onCancelled(databaseError: DatabaseError) =
+                        Unit
             }
             mChildEventListener?.let {
                 mMessagesDatabaseReference?.addChildEventListener(it)
